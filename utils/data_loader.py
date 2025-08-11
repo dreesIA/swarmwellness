@@ -12,6 +12,18 @@ from typing import Optional, Dict, Any
 import os
 from datetime import datetime, timedelta
 
+scope = ["https://spreadsheets.google.com/feeds",
+         "https://www.googleapis.com/auth/drive"]
+
+if "GSPREAD_CREDENTIALS" in st.secrets:
+    creds_dict = json.loads(st.secrets["GSPREAD_CREDENTIALS"])
+    creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
+else:
+    creds = Credentials.from_service_account_file("gspread_credentials.json", scopes=scope)
+
+client = gspread.authorize(creds)
+sheet = client.open("Morning Wellness Tracker").worksheet("Form Responses 1")
+data = sheet.get_all_records()
 
 @st.cache_data(ttl=300)  # Cache for 5 minutes
 def load_google_sheet(
